@@ -521,7 +521,7 @@ void FSImp::ls(vector<string> args) {
   }
 }
 
-//
+//reads the contents of the file
 void FSImp::cat(vector<string> args) {
   ops_at_least(1);
 
@@ -539,7 +539,8 @@ void FSImp::cat(vector<string> args) {
   }
 }
 
-//
+//Check for file/dir access. Check if source and destination can be opened. read from source, write to destination. 
+//Close source and destination 
 void FSImp::cp(vector<string> args) {
   ops_exactly(2);
   
@@ -557,4 +558,33 @@ void FSImp::cp(vector<string> args) {
       basic_close(dest.fd);
     }
   }
+}
+
+//Helper to print directory structure
+void tree_helper(shared_ptr<DirEntry> directory, string indent) {
+  auto cont = directory->contents;
+  if (directory->type == file) {
+    cout << directory->name << ": " << directory->inode->size 
+        << " bytes" << endl;
+  } else {
+    cout << directory->name << endl;
+  }
+  if (cont.size() == 0) return;
+
+  if (cont.size() >= 2) {
+    auto last = *(cont.rbegin());
+    for (auto entry = cont.begin(); *entry != last; entry++) {
+      cout << indent << "├───";
+      tree_helper(*entry, indent + "│   ");
+    }
+  }
+  cout << indent << "└───";
+  tree_helper(*(cont.rbegin()), indent + "    ");
+}
+
+//prints directory structure
+void ToyFS::tree(vector<string> args) {
+  ops_exactly(0);
+
+  tree_helper(pwd, "");
 }
