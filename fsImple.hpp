@@ -71,9 +71,7 @@ class FSImp{
     void cat(std::vector<std::string> args);
     void copy(std::vector<std::string> args);
     void tree(std::vector<std::string> args);
-    void import(std::vector<std::string> args);
     void printwd(std::vector<std::string> args);
-    void FS_export(std::vector<std::string> args);
 };
 
 #endif
