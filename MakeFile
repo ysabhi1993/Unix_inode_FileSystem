@@ -7,14 +7,14 @@ default: main
 debug: CFLAGS += -DDEBUG
 debug: default 
 
-main: main.cpp toyfs.o direntry.o inode.o
-	$(CXX) $(CFLAGS) -o main main.cpp direntry.o toyfs.o inode.o
+main: main.cpp fsImple.o dirEntry.o inode.o
+	$(CXX) $(CFLAGS) -o main main.cpp dirEntry.o fsImple.o inode.o
 
-toyfs.o: toyfs.cpp toyfs.hpp
-	$(CXX) $(CFLAGS) -c toyfs.cpp
+fsImple.o: fsImple.cpp fsImple.hpp
+	$(CXX) $(CFLAGS) -c fsImple.cpp
 
-direntry.o: direntry.cpp direntry.hpp
-	$(CXX) $(CFLAGS) -c direntry.cpp
+dirEntry.o: dirEntry.cpp dirEntry.hpp
+	$(CXX) $(CFLAGS) -c dirEntry.cpp
 
 inode.o: inode.cpp inode.hpp
 	$(CXX) $(CFLAGS) -c inode.cpp
