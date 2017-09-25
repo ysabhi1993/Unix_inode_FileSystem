@@ -1,3 +1,10 @@
+/*
+Every Inode object contains
+1. a list of pointers to freeNodes
+2. block size
+3. blocks used
+4. A list of pointers to inode blocks that are owned by a unique pointer.
+*/
 #ifndef _INODE_H_
 #define _INODE_H_
 
