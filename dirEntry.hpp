@@ -1,3 +1,18 @@
+/*
+Every DirEntry class type object contains 
+1. block size
+2. the name of the file/directory
+3. type of the object - whether its a file or directory
+4. a pointer to its parent
+5. a pointer to itself
+6. a pointer to its inode 
+7. a list of pointers to all its contents.
+8. a boolean variable to check if the object is in use(locked) or not(unlocked)
+9. other create directory/file methods.
+*/
+
+
+
 #ifndef _DIRENTRY_H_
 #define _DIRENTRY_H_
 
