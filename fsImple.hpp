@@ -1,3 +1,24 @@
+/*
+The file system contains the following information:
+	1. Descriptor structure that describes every file/directory in the filesystem like:
+		- access rights to the file
+		- current byte position 
+		- a pointer to the corresponding inode
+		- a pointer to the file/dir itself
+		- the number of last file descriptor
+	2. Path structure to the file/dir 
+		- final name (of the dir/file)
+		- a pointer to the parent node
+		- a pointer to the final node 
+	3. file/dir name
+	4. block size, disk file, number of direct blocks, number of blocks making up the file/dir
+	5. freeNode list
+	6. root directory path, current working dir path
+	7. a list of open files along with the corresponding descriptors.
+	8. basic commands like open, close, write, seek, read, mkdir, rmdir, cd, link, unlink, stat, ls, cat, 
+       cp, print working directory, tree representation
+*/
+
 #ifndef _FSIMP_H_
 #define _FSIMP_H_
 
