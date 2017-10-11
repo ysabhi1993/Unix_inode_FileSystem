@@ -11,8 +11,6 @@ Every DirEntry class type object contains
 9. other create directory/file methods.
 */
 
-
-
 #ifndef _DIRENTRY_H_
 #define _DIRENTRY_H_
 
@@ -45,7 +43,7 @@ class DirEntry : public std::enable_shared_from_this<DirEntry>{
 
       std::shared_ptr<DirEntry> find_child(const std::string name) const;
       std::shared_ptr<DirEntry> add_dir(const std::string name);
-      std::shared_ptd<DirEntry> add_file(const std::string name);
+      std::shared_ptr<DirEntry> add_file(const std::string name);
 };
 
 #endif 
