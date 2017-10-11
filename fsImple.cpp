@@ -28,18 +28,18 @@ using namespace std;
       return;                                             \
   }
 
-#define ops_exact(x)            \
+#define ops_exactly(x)            \
   ops_at_least(x);              \
   ops_less_than(x);
 
 FSImp::FSImp(const std::string &filename,
-             const uint fs_size;
-             const uint block_size;
+             const uint fs_size,
+             const uint block_size,
              const uint direct_blocks)
 
         :filename(filename), 
          block_size(block_size), 
-         direct_blocks(direct_blocks)
+         direct_blocks(direct_blocks),
          num_blocks(ceil(static_cast<double>(fs_size)/block_size)){
             Inode::block_size = block_size;
             Inode::freeNode_list = &freeNode_list;
@@ -104,9 +104,9 @@ unique_ptr<FSImp::PathRet> FSImp::parse_path(string path_str) const{
 }
 
 bool FSImp::getMode(Mode *mode, string mode_s){
-    if(mode_s == "w") *mode = "W";
-    else if(mode s == "r") *mode = "R";
-    else if(mode s == "rw") *mode = "RW";
+    if(mode_s == "w") *mode = W;
+    else if(mode_s == "r") *mode = R;
+    else if(mode_s == "rw") *mode = RW;
     else return false;
     return true;
 }
@@ -125,7 +125,7 @@ bool FSImp::basic_open(Descriptor *d, vector<string> args){
         cerr << args[0] << ": error: Invalid path: " << args[1] << endl;
     }else if(!known_mode){
         cerr << args[0] << ": error: Unknown mode: " << args[2] << endl;
-    }else if(node == nullptr && (mode == "R" || mode == "RW")){
+    }else if(node == nullptr && (mode == R || mode == RW)){
         cerr << args[0] << ": error: " << args[1] << " does not exist." << endl;
     }else if(node != nullptr && node->type == dir){
         cerr << args[0] << ": error: Cannot open a directory." << endl;
@@ -150,7 +150,7 @@ bool FSImp::basic_open(Descriptor *d, vector<string> args){
 }
 
 void FSImp::open(vector<string> args){
-    ops_exact(2);
+    ops_exactly(2);
     Descriptor desc;
     if(basic_open(&desc, args)){
         cout << "SUCCESS: fd = " << desc.fd << endl;
@@ -541,7 +541,7 @@ void FSImp::cat(vector<string> args) {
 
 //Check for file/dir access. Check if source and destination can be opened. read from source, write to destination. 
 //Close source and destination 
-void FSImp::cp(vector<string> args) {
+void FSImp::copy(vector<string> args) {
   ops_exactly(2);
   
   Descriptor src, dest;
@@ -583,7 +583,7 @@ void tree_helper(shared_ptr<DirEntry> directory, string indent) {
 }
 
 //prints directory structure
-void ToyFS::tree(vector<string> args) {
+void FSImp::tree(vector<string> args) {
   ops_exactly(0);
 
   tree_helper(pwd, "");
