@@ -49,7 +49,7 @@ class FSImp{
         std::string final_name;
         std::shared_ptr<DirEntry> parent_node;
         std::shared_ptr<DirEntry> final_node;
-    }
+    };
 
     const std::string filename;
     std::fstream disk_file;
@@ -67,14 +67,14 @@ class FSImp{
     void init_disk(const std::string &file_name);
     std::unique_ptr<PathRet> parse_path(std::string path_str) const;
     bool basic_open(Descriptor *d, std::vector< std::string > args);
-    std::unique_ptr<std::string> basic_read(descriptor &desc, const uint size);
+    std::unique_ptr<std::string> basic_read(Descriptor &desc, const uint size);
     uint basic_write(Descriptor &desc, const std::string data);
     bool basic_close(uint fd);
 
   public:
     FSImp(const std::string &filename,
-          const uint fs_size;
-          const uint block_size;
+          const uint fs_size,
+          const uint block_size,
           const uint direct_blocks);
     ~FSImp();
     void open(std::vector<std::string> args);
