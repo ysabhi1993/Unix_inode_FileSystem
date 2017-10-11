@@ -43,7 +43,7 @@ TreeNode::TreeNode(){
 
     // Initially every node is a leaf
     leaf = true; 
-
+    
     // Exit if the lowerBoundKey is not defined
     if (lowerBound == 0) {
         cout << "LowerKeyBound not defined";
@@ -449,6 +449,7 @@ void TreeNode::splitLeaf() {
 void insert(TreeNode *root, FileObject object) {
     //If the root is a leaf, we can directly insert
     if (root->isLeaf()) {
+        
         //Insert object
         root->insertObject(object);
 
