@@ -23,7 +23,7 @@ class Inode{
         uint size;
         uint blocks_used; 
         std::vector<uint> data_blocks;
-        std::unique_ptr<std::vector<std::vector<int> > > inode_blocks;
+        std::unique_ptr<std::vector<std::vector<uint> > > inode_blocks;
         
         Inode();
         ~Inode();
