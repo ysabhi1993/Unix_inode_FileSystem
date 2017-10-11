@@ -8,21 +8,24 @@
 #define TREE_PREFIX "leaves/leaf_"
 #define OBJECT_FILE "objects/objectFile"
 #define DEFAULT_LOCATION -1
+//#define DEBUG_NORMAL
 
 #include <sys/types.h>
 #include <algorithm>
 #include <climits>
 #include <cmath> 
-#include <string>
+#include <cstring>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <queue>
 #include <vector>
+#include <list>
 
-using std::list
-using std::sort
-using std::vector
-using std::queue
+using std::list;
+using std::sort;
+using std::vector;
+using std::queue;
 
 long TreeNode::lowerBound = 0;
 long TreeNode::upperBound = 0;
@@ -50,7 +53,7 @@ TreeNode::TreeNode(){
     fileIndex = ++fileCount; 
 }
 
-Node::Node(long _fileIndex) {
+TreeNode::TreeNode(long _fileIndex) {
     // Exit if the lowerBoundKey is not defined
     if (lowerBound == 0) {
         cout << "LowerKeyBound not defined";
@@ -62,7 +65,7 @@ Node::Node(long _fileIndex) {
     readFromDisk();
 }
 
-void Node::initialize() {
+void TreeNode::initialize() {
     // Set page size
     ifstream configFile;
     configFile.open(CONFIG_FILE);
@@ -85,7 +88,7 @@ void Node::initialize() {
 }
 
 //Check where the given key fits in the Keys vector.
-long Node::getKeyPosition(double key) {
+long TreeNode::getKeyPosition(double key) {
     // If keys are empty, return
     if (keys.size() == 0 || key <= keys.front()) {
         return 0;
@@ -101,7 +104,7 @@ long Node::getKeyPosition(double key) {
 }
 
 //Write to disk, information of all the files.
-void Node::commitToDisk() {
+void TreeNode::commitToDisk() {
     // Create a character buffer which will be written to disk
     long location = 0;
     char buffer[pageSize];
@@ -151,7 +154,7 @@ void Node::commitToDisk() {
     nodeFile.close();
 }
 
-void Node::readFromDisk() {
+void TreeNode::readFromDisk() {
     // Create a character buffer which will be written to disk
     long location = 0;
     char buffer[pageSize];
@@ -211,9 +214,9 @@ void Node::readFromDisk() {
     }
 }
 
-/*
+
 //Helper for object Insertion
-void Node::insertObject(DBObject object) {
+void TreeNode::insertObject(FileObject object) {
     long position = getKeyPosition(object.getKey());
 
     // insert the new key to keys
@@ -225,12 +228,12 @@ void Node::insertObject(DBObject object) {
     // Commit the new node back into memory
     commitToDisk();
 }
-*/
+
 
 //Split a node if it is full
-void Node::splitInternal() {
+void TreeNode::splitInternal() {
     //Create a surrogate internal node
-    Node *surrogateInternalNode = new Node();
+    TreeNode *surrogateInternalNode = new TreeNode();
     surrogateInternalNode->setToInternalNode();
 
     //Fix the keys of the new node
@@ -247,7 +250,7 @@ void Node::splitInternal() {
          surrogateInternalNode->childIndices.push_back(*childIndex);
 
         //Assign parent to the children nodes
-        Node *tempChildNode = new Node(*childIndex);
+        TreeNode *tempChildNode = new TreeNode(*childIndex);
         tempChildNode->parentIndex = surrogateInternalNode->fileIndex;
         tempChildNode->commitToDisk();
         delete tempChildNode;
@@ -264,12 +267,12 @@ void Node::splitInternal() {
         commitToDisk();
 
         //Now we push up the splitting one level
-        Node *tempParent = new Node(parentIndex);
+        TreeNode *tempParent = new TreeNode(parentIndex);
         tempParent->insertNode(startPoint, fileIndex, surrogateInternalNode->fileIndex);
         delete tempParent;
     } else {
         //Create a new parent node
-        Node *newParent = new Node();
+        TreeNode *newParent = new TreeNode();
         newParent->setToInternalNode();
 
         //Assign parents
@@ -299,7 +302,7 @@ void Node::splitInternal() {
     delete surrogateInternalNode;
 }
 
-void Node::serialize() {
+void TreeNode::serialize() {
     //Return if node is empty
     if (keys.size() == 0) {
         return;
@@ -309,7 +312,7 @@ void Node::serialize() {
     previousLevel.push(make_pair(fileIndex, 'N'));
 
     long currentIndex;
-    Node *iterator;
+    TreeNode *iterator;
     char type;
     while (!previousLevel.empty()) {
         queue< pair<long, char> > nextLevel;
@@ -317,7 +320,7 @@ void Node::serialize() {
         while (!previousLevel.empty()) {
             //Get the front and pop
             currentIndex = previousLevel.front().first;
-            iterator = new Node(currentIndex);
+            iterator = new TreeNode(currentIndex);
             type = previousLevel.front().second;
             previousLevel.pop();
 
@@ -350,7 +353,7 @@ void Node::serialize() {
     }
 }
 
-void Node::insertNode(double key, long leftChildIndex, long rightChildIndex) {
+void TreeNode::insertNode(double key, long leftChildIndex, long rightChildIndex) {
     // insert the new key to keys
     long position = getKeyPosition(key);
     keys.insert(keys.begin() + position, key);
@@ -372,11 +375,11 @@ void Node::insertNode(double key, long leftChildIndex, long rightChildIndex) {
     }
 }
 
-void Node::splitLeaf() {
+void TreeNode::splitLeaf() {
     // Create a surrogate leaf node with the keys and object Pointers
-    Node *surrogateLeafNode = new Node();
+    TreeNode *surrogateLeafNode = new TreeNode();
     for (long i = lowerBound; i < (long) keys.size(); ++i) {
-        DBObject object = DBObject(keys[i], objectPointers[i]);
+        FileObject object = FileObject(keys[i], objectPointers[i]);
         surrogateLeafNode->insertObject(object);
     }
 
@@ -392,7 +395,7 @@ void Node::splitLeaf() {
     // If the tempLeafIndex is not null we have to load it and set its
     // previous index
     if (tempLeafIndex != DEFAULT_LOCATION) {
-        Node *tempLeaf = new Node(tempLeafIndex);
+        TreeNode *tempLeaf = new TreeNode(tempLeafIndex);
         tempLeaf->previousLeafIndex = surrogateLeafNode->fileIndex;
         tempLeaf->commitToDisk();
         delete tempLeaf;
@@ -408,12 +411,12 @@ void Node::splitLeaf() {
         commitToDisk();
 
         // Now we push up the splitting one level
-        Node *tempParent = new Node(parentIndex);
+        TreeNode *tempParent = new TreeNode(parentIndex);
         tempParent->insertNode(surrogateLeafNode->keys.front(), fileIndex, surrogateLeafNode->fileIndex);
         delete tempParent;
     } else {
         // Create a new parent node
-        Node *newParent = new Node();
+        TreeNode *newParent = new TreeNode();
         newParent->setToInternalNode();
 
         // Assign parents
@@ -443,7 +446,7 @@ void Node::splitLeaf() {
     delete surrogateLeafNode;
 }
 
-void insert(Node *root, DBObject object) {
+void insert(TreeNode *root, FileObject object) {
     //If the root is a leaf, we can directly insert
     if (root->isLeaf()) {
         //Insert object
@@ -458,7 +461,7 @@ void insert(Node *root, DBObject object) {
         long position = root->getKeyPosition(object.getKey());
 
         //Load the node from disk
-        Node *nextRoot = new Node(root->childIndices[position]);
+        TreeNode *nextRoot = new TreeNode(root->childIndices[position]);
 
         //Recurse into the node
         insert(nextRoot, object);
@@ -469,7 +472,7 @@ void insert(Node *root, DBObject object) {
 }
 
 //Point search in a BPlusTree
-void pointQuery(Node *root, double searchKey) {
+void pointQuery(TreeNode *root, double searchKey) {
     //If the root is a leaf, we can directly search
     if (root->isLeaf()) {
         //Print all nodes in the current leaf
@@ -479,7 +482,7 @@ void pointQuery(Node *root, double searchKey) {
                 cout << root->keys[i] << " ";
 #endif
 #ifdef OUTPUT
-                cout << DBObject(root->keys[i], root->objectPointers[i]).getDataString() << endl;
+                cout << FileObject(root->keys[i], root->objectPointers[i]).getDataString() << endl;
 #endif
             }
         }
@@ -487,7 +490,7 @@ void pointQuery(Node *root, double searchKey) {
         //Check nextleaf for same node
         if (root->nextLeafIndex != DEFAULT_LOCATION) {
             //Load up the nextLeaf from disk
-            Node *tempNode = new Node(root->nextLeafIndex);
+            TreeNode *tempNode = new TreeNode(root->nextLeafIndex);
 
             //Check in the nextLeaf and delegate
             if (tempNode->keys.front() == searchKey) {
@@ -500,7 +503,7 @@ void pointQuery(Node *root, double searchKey) {
         long position = root->getKeyPosition(searchKey);
 
         //Load the node from disk
-        Node *nextRoot = new Node(root->childIndices[position]);
+        TreeNode *nextRoot = new TreeNode(root->childIndices[position]);
 
         //Recurse into the node
         pointQuery(nextRoot, searchKey);
@@ -509,8 +512,3 @@ void pointQuery(Node *root, double searchKey) {
         delete nextRoot;
     }
 }
-
-
-
-
-
