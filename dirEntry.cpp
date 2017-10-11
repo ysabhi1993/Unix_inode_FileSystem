@@ -1,4 +1,5 @@
 #include "dirEntry.hpp"
+
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -34,7 +35,7 @@ shared_ptr<DirEntry> DirEntry::make_dir(const string name,
 
 shared_ptr<DirEntry> DirEntry::make_file(const string name, 
                                          const shared_ptr<DirEntry> parent, 
-                                         const std::shared_ptr<Inode> &inode = nullptr){
+                                         const shared_ptr<Inode> &inode){
     
     auto sp = make_shared<DirEntry>(DirEntry());
     if(parent == nullptr){
@@ -52,11 +53,11 @@ shared_ptr<DirEntry> DirEntry::make_file(const string name,
 
 shared_ptr<DirEntry> DirEntry::find_child(const string name) const {
     //handle current and parent directories
-    if(name == ".") return self.lock();
-    else if(name == "..") return parent.lock();
+    if(name == "..") return parent.lock();
+    else if(name == ".") return self.lock();
 
     //search through contents and return pointer if found, else return nullptr;
-    auto names = [&] (const shared_ptr<DirEntry> de) {return de->name == name;};
+    auto named = [&] (const shared_ptr<DirEntry> de) {return de->name == name;};
     auto it = find_if(contents.begin(), contents.end(), named);
     
     if(it == contents.end()) return nullptr;
